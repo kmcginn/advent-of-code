@@ -53,4 +53,5 @@ def main():
             s = str(decrypted_name) + ' ' + str(sector) + '\n'
             r.write(s)
 
-main()
+if __name__ == "__main__":
+    main()

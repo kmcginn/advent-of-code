@@ -1,4 +1,7 @@
 """ Solution to Day 14
+
+from: http://adventofcode.com/2016/day/14
+
 --- Day 14: One-Time Pad ---
 
 In order to communicate securely with Santa while you're on this mission, you've been using a

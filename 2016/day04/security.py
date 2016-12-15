@@ -29,4 +29,5 @@ def main():
             sectorSum += sector
     print(sectorSum)
 
-main()
+if __name__ == "__main__":
+    main()

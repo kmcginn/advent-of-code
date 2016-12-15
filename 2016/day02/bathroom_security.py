@@ -40,4 +40,5 @@ def main():
         key = findKey(key, converted)
         print(key)
 
-main()
+if __name__ == "__main__":
+    main()

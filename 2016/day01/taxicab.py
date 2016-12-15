@@ -63,4 +63,5 @@ def main():
     totalDistance = abs(x) + abs(y)
     print(totalDistance)
 
-main()
+if __name__ == "__main__":
+    main()

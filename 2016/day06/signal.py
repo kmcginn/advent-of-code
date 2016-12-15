@@ -46,4 +46,5 @@ def main():
     for c in totals:
         print(c.most_common(1))
 
-main()
+if __name__ == "__main__":
+    main()

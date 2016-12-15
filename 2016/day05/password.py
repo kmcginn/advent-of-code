@@ -11,4 +11,5 @@ def main():
         i = i + 1
     print(password)
 
-main()
+if __name__ == "__main__":
+    main()

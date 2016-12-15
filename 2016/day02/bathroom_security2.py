@@ -44,4 +44,5 @@ def main():
         key = findKey(key, converted)
         print(hex(key))
 
-main()
+if __name__ == "__main__":
+    main()
