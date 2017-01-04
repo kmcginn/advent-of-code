@@ -21,15 +21,45 @@ larger string).
 How many IPs in your puzzle input support TLS?
 '''
 
+import re
+
 def is_abba(abba_str):
     """Returns true if 4 character string consists of a pair of two different characters followed
     by the reverse of that pair"""
     if len(abba_str) != 4:
         raise Exception
+    return abba_str[0] == abba_str[3] and abba_str[1] == abba_str[2] and abba_str[0] != abba_str[1]
+
+def contains_abba(sequence):
+    """Returns true if sequence contains at least one ABBA"""
+    # TODO: figure out a more Python-esque way to do this
+    for i in range(len(sequence) - 3):
+        if is_abba(sequence[i:i+4]):
+            return True
+    return False
+
+def supports_tls(ip_string):
+    """Returns true if ip supports TLS"""
+    hypers = re.findall(r'\[([a-z]+)\]', ip_string)
+    for h in hypers:
+        if contains_abba(h):
+            return False
+        # remove the hypertexts from the IP for easier splitting later
+        ip_string = ip_string.replace(h, '')
+    normals = ip_string.split('[]')
+    for n in normals:
+        if contains_abba(n):
+            return True
+    return False
 
 def main():
     """Execution of solution"""
-    pass
+    count = 0
+    with open("input.txt") as input_file:
+        for line in input_file:
+            if supports_tls(line):
+                count = count + 1
+    print(count)
 
 if __name__ == "__main__":
     main()
