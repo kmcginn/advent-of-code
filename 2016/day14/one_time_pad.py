@@ -38,9 +38,34 @@ So, using our example salt of abc, index 22728 produces the 64th key.
 Given the actual salt in your puzzle input, what index produces your 64th one-time pad key?
 """
 
+import hashlib
+import re
+
+def generates_key(salt, index):
+    """Returns true if the hash of salt and the index contains one character three times in a row,
+    and one of the next 1000 hashes with the same salt and an increasing index contains the same
+    character five times in a row"""
+    starting_hash = hashlib.md5(str.encode(salt + str(index))).hexdigest()
+    match = re.search(r'([a-z0-9])\1\1', starting_hash)
+    if match is None:
+        return False
+    repeat_target = match[1] + match[1] + match[1] + match[1] + match[1]
+    for i in range(index + 1, index + 1001):
+        new_hash = hashlib.md5(str.encode(salt + str(i))).hexdigest()
+        if repeat_target in new_hash:
+            return True
+    return False
+
 def main():
     """Execution of solution"""
-    pass
+    salt = 'abc'
+    index = 0
+    key_count = 0
+    while key_count < 64:
+        if generates_key(salt, index):
+            key_count += 1
+        index += 1
+    print(index - 1)
 
 if __name__ == "__main__":
     main()
