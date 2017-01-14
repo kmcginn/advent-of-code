@@ -25,6 +25,13 @@ What is the decompressed length of the file using this improved format?
 
 import re
 
+def get_decompressed_length(tag, data):
+    """Get the decompressed length of the data after the duplication tag"""
+    # do something with recursion?
+    # base case is there is no tag in the decompressed data, so return length of the data
+    # recursive case is find the tag and the data it applies to, and get_decompressed_length on that
+    pass
+
 def main():
     """Solve the problem!"""
     data = 'X(8x2)(3x3)ABCY'
