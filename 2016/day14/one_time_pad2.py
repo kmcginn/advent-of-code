@@ -37,27 +37,45 @@ index now produces your 64th one-time pad key?
 import hashlib
 import re
 
-def generate_hash(salt):
-    """Return the result of hashing the salt with MD5 2017 times"""
-    stretched_hash = hashlib.md5(str.encode(salt)).hexdigest()
-    for i in range(0, 2016):
-        stretched_hash = hashlib.md5(str.encode(stretched_hash)).hexdigest()
-    return stretched_hash
+class StretchedHasher(object):
+    """Class for generating a stretched hash, with internal caching for speed!"""
+    def __init__(self):
+        self.cache = dict()
 
-def generates_key(salt, index):
+    def generate_hash(self, salt):
+        """Return the result of hashing the salt with MD5 2017 times"""
+
+        # check for cache hit
+        if salt in self.cache.keys():
+            return self.cache[salt]
+
+        if len(self.cache.keys()) >= 1000:
+            # clean up the salt with the lowest index in the cache to optimize space
+            del self.cache[sorted(self.cache.keys(), key=lambda salt: int(re.findall(r'[0-9]+', salt)[0]))[0]]
+
+        stretched_hash = hashlib.md5(str.encode(salt)).hexdigest()
+        for i in range(0, 2016):
+            stretched_hash = hashlib.md5(str.encode(stretched_hash)).hexdigest()
+
+        # add computed hash to the cache
+        self.cache[salt] = stretched_hash
+
+        return stretched_hash
+
+def generates_key(salt, index, hasher):
     """Returns true if the stretched hash of salt and the index contains one character three times
     in a row, and one of the next 1000 stretched hashes with the same salt and an increasing index
     contains the same character five times in a row"""
-    starting_hash = generate_hash(salt + str(index))
+    starting_hash = hasher.generate_hash(salt + str(index))
     match = re.search(r'([a-z0-9])\1\1', starting_hash)
     if match is None:
-        return False
+        return (False, hasher)
     repeat_target = match[1] + match[1] + match[1] + match[1] + match[1]
     for i in range(index + 1, index + 1001):
-        new_hash = generate_hash(salt + str(i))
+        new_hash = hasher.generate_hash(salt + str(i))
         if repeat_target in new_hash:
-            return True
-    return False
+            return (True, hasher)
+    return (False, hasher)
 
 
 def main():
@@ -65,9 +83,12 @@ def main():
     salt = 'abc'
     index = 0
     key_count = 0
+    hasher = StretchedHasher()
     while key_count < 64:
-        print("Checking index " + str(index))
-        if generates_key(salt, index):
+        # print("Checking index " + str(index))
+        result = generates_key(salt, index, hasher)
+        hasher = result[1]
+        if result[0]:
             key_count += 1
         index += 1
     print(index - 1)
