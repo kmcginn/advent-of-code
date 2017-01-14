@@ -33,9 +33,39 @@ What is the decompressed length of the file (your puzzle input)? Don't count whi
 
 """
 
+import re
+
 def main():
     """Solve the problem!"""
-    pass
+    data = 'X(8x2)(3x3)ABCY'
+    # with open("input.txt") as input_file:
+    #     data = input_file.read()
+    decompressed = ''
+    while len(data) != 0:
+
+        # find the next tag
+        matched = re.search(r'([a-zA-Z]*)(\(([0-9]+)x[0-9]+\))', data)
+
+        if matched is not None:
+            # add all the normal stuff to decompressed
+            decompressed += matched[1]
+
+            # figure out what will be duplicated
+            tag = matched[2]
+            dup_length, dup_count = [int(x) for x in tag.strip('()').split('x')]
+            dup_this = data[len(matched[0]):len(matched[0]) + dup_length]
+
+            # duplicate it, add to decompressed
+            for _ in range(0, dup_count):
+                decompressed += dup_this
+
+            # remove normal, tag, and duplicated stuff from remaining data
+            data = data[(len(matched[0]) + dup_length):]
+        else:
+            # no tags left, just append what is left
+            decompressed += data
+            data = ''
+    print(len(decompressed))
 
 if __name__ == "__main__":
     main()
