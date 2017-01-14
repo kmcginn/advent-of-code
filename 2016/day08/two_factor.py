@@ -92,7 +92,6 @@ def process_instruction(instruction, display):
                 rotated_display.append(display[row].copy())
             for row in range(0, len(display)-rotation):
                 rotated_display.append(display[row].copy())
-            #rotated_display = display[-rotation:].deepcopy() + display[:-rotation].deepcopy()
             for row in range(0, len(display)):
                 display[row][col] = rotated_display[row][col]
         else:
