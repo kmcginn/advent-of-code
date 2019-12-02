@@ -38,7 +38,7 @@ Once the program has halted, its output is available at address 0, also just lik
 you try a pair of inputs, make sure you first reset the computer's memory to the values in the
 program (your puzzle input) - in other words, don't reuse memory from a previous attempt.
 
-Find the input noun and verb that cause the program to produce the output 19690720. 
+Find the input noun and verb that cause the program to produce the output 19690720.
 What is 100 * noun + verb? (For example, if noun=12 and verb=2, the answer would be 1202.)
 
 """
@@ -85,7 +85,7 @@ def main():
             result = run_intcode(memory)
             if result == intended_output:
                 print(x, y)
-                return  
+                return
 
 if __name__ == "__main__":
     main()
