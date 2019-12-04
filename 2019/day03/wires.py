@@ -57,14 +57,45 @@ What is the Manhattan distance from the central port to the closest intersection
 
 import os
 
+def generate_trail(wire_directions):
+    """Given a list of wire directions, generate a set of coordinate pairs for the wire's path"""
+    trail = set()
+    current_location = (0, 0)
+    for direction in wire_directions:
+        heading = direction[0]
+        distance = int(direction[1:])
+        while distance > 0:
+            if heading == "R":
+                current_location = (current_location[0] + 1, current_location[1])
+            elif heading == "L":
+                current_location = (current_location[0] - 1, current_location[1])
+            elif heading == "U":
+                current_location = (current_location[0], current_location[1] + 1)
+            elif heading == "D":
+                current_location = (current_location[0], current_location[1] - 1)
+            else:
+                raise Exception
+            trail.add(current_location)
+            distance -= 1
+    return trail
+
 def main():
     """Solve the problem!"""
     script_dir = os.path.dirname(__file__)
     file_path = os.path.join(script_dir, './input.txt')
     with open(file_path) as input_file:
-        wire_path1 = input_file.readline().split(",")
-        wire_path2 = input_file.readline().split(",")
-    pass
+        wire1_directions = input_file.readline().split(",")
+        wire2_directions = input_file.readline().split(",")
+    wire1_path = generate_trail(wire1_directions)
+    wire2_path = generate_trail(wire2_directions)
+    crosses = wire1_path.intersection(wire2_path)
+    min_distance = None
+    for cross in crosses:
+        distance = abs(cross[0]) + abs(cross[1])
+        if(min_distance is None or distance < min_distance):
+            min_distance = distance
+    print(min_distance)
+
 
 if __name__ == "__main__":
     main()
