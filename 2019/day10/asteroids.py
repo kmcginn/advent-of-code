@@ -119,13 +119,39 @@ that location?
 """
 
 import os
+import math
 
 def main():
     """Solve the problem!"""
     script_dir = os.path.dirname(__file__)
     file_path = os.path.join(script_dir, './input.txt')
+    # generate list of asteroid coordinates from input
+    asteroid_coords = list()
     with open(file_path) as input_file:
-        pass
+        row = 0
+        for line in input_file:
+            col = 0
+            for char in line:
+                if char == '#':
+                    asteroid_coords.append((col, row))
+                col += 1
+            row += 1
+    max_asteroids_seen = None
+    for point in asteroid_coords:
+        unique_asteroid_angles = set()
+        for target in asteroid_coords:
+            # skip comparing a point to itself
+            if point == target:
+                continue
+            # calculate the angle between the evaluated point and the target asteroid
+            delta_y = target[1] - point[1]
+            delta_x = target[0] - point[0]
+            angle = math.atan2(delta_y, delta_x)
+            # only store unique angles (since the first asteroid "blocks" others in that line)
+            unique_asteroid_angles.add(angle)
+        if max_asteroids_seen is None or len(unique_asteroid_angles) > max_asteroids_seen:
+            max_asteroids_seen = len(unique_asteroid_angles)
+    print(max_asteroids_seen)
 
 if __name__ == "__main__":
     main()
