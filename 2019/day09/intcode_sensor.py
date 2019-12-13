@@ -248,7 +248,9 @@ def main():
     memory = defaultdict(lambda: 0)
     for i in range(0, len(init_memory)):
         memory[i] = init_memory[i]
-    input_list = [1]
+    # part 1, input is 1
+    # part 2, input is 2
+    input_list = [2]
     run_intcode(memory, input_list)
 
 if __name__ == "__main__":
