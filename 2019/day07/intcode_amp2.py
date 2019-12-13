@@ -66,6 +66,29 @@ def list_digits(number):
     digits.append(number)
     return digits
 
+def get_param_value(mode, memory, ptr):
+    """Returns the value of the parameter at memory[ptr] based on the mode"""
+    # position mode
+    if mode == 0:
+        return memory[memory[ptr]]
+    # immediate mode
+    elif mode == 1:
+        return memory[ptr]
+    else:
+        raise Exception
+
+def get_write_param_value(mode, memory, ptr):
+    """Returns the value of the paramter at memory[ptr] based on the mode, for a writing parameter"""
+    # position mode
+    if mode == 0:
+        return memory[ptr]
+    # immediate mode
+    elif mode == 1:
+        # immediate mode is not supported
+        raise Exception
+    else:
+        raise Exception
+
 def run_intcode(memory, input_list, instr_ptr=0, input_ptr=0, previous_output=None):
     """Run an Intcode program from memory"""
     output = previous_output
@@ -88,122 +111,53 @@ def run_intcode(memory, input_list, instr_ptr=0, input_ptr=0, previous_output=No
         # ADD - num1, num2, store
         if opcode == 1:
             # process num1
-            # position mode
-            if param_modes[0] == 0:
-                num1 = memory[memory[instr_ptr + 1]]
-            # immediate mode
-            elif param_modes[0] == 1:
-                num1 = memory[instr_ptr + 1]
-            else:
-                raise Exception
+            num1 = get_param_value(param_modes[0], memory, instr_ptr + 1)
 
             # process num2
-            # position mode
-            if param_modes[1] == 0:
-                num2 = memory[memory[instr_ptr + 2]]
-            # immediate mode
-            elif param_modes[1] == 1:
-                num2 = memory[instr_ptr + 2]
-            else:
-                raise Exception
+            num2 = get_param_value(param_modes[1], memory, instr_ptr + 2)
 
             # process store
-            # position mode
-            if param_modes[2] == 0:
-                store = memory[instr_ptr + 3]
-            # immediate mode
-            elif param_modes[2] == 1:
-                # this parameter cannot be in immediate mode
-                raise Exception
-            else:
-                raise Exception
+            store = get_write_param_value(param_modes[2], memory, instr_ptr + 3)
+
             memory[store] = num1 + num2
             instr_ptr = instr_ptr + 4
 
         # MULTIPLY - num1, num2, store
         elif opcode == 2:
             # process num1
-            # position mode
-            if param_modes[0] == 0:
-                num1 = memory[memory[instr_ptr + 1]]
-            # immediate mode
-            elif param_modes[0] == 1:
-                num1 = memory[instr_ptr + 1]
-            else:
-                raise Exception
+            num1 = get_param_value(param_modes[0], memory, instr_ptr + 1)
 
             # process num2
-            # position mode
-            if param_modes[1] == 0:
-                num2 = memory[memory[instr_ptr + 2]]
-            # immediate mode
-            elif param_modes[1] == 1:
-                num2 = memory[instr_ptr + 2]
-            else:
-                raise Exception
+            num2 = get_param_value(param_modes[1], memory, instr_ptr + 2)
 
             # process store
-            # position mode
-            if param_modes[2] == 0:
-                store = memory[instr_ptr + 3]
-            # immediate mode
-            elif param_modes[2] == 1:
-                # this parameter cannot be in immediate mode
-                raise Exception
-            else:
-                raise Exception
+            store = get_write_param_value(param_modes[2], memory, instr_ptr + 3)
+
             memory[store] = num1 * num2
             instr_ptr = instr_ptr + 4
 
         # INPUT - position
         elif opcode == 3:
-            # position mode
-            if param_modes[0] == 0:
-                position = memory[instr_ptr + 1]
-            # immediate mode
-            elif param_modes[0] == 1:
-                # parameter cannot be in immediate mode
-                raise Exception
-            else:
-                raise Exception
+            position = get_write_param_value(param_modes[0], memory, instr_ptr + 1)
+
             memory[position] = input_list[input_ptr]
             input_ptr = input_ptr + 1
             instr_ptr = instr_ptr + 2
 
         # OUTPUT - position
         elif opcode == 4:
-            # position mode
-            if param_modes[0] == 0:
-                output = memory[memory[instr_ptr + 1]]
-            # immediate mode
-            elif param_modes[0] == 1:
-                output = memory[instr_ptr + 1]
-            else:
-                raise Exception
+            output = get_param_value(param_modes[0], memory, instr_ptr + 1)
+
             instr_ptr = instr_ptr + 2
             return (output, instr_ptr, input_ptr)
 
         # JUMP-IF-TRUE - test, new_ptr
         elif opcode == 5:
             # process test
-            # position mode
-            if param_modes[0] == 0:
-                test = memory[memory[instr_ptr + 1]]
-            # immediate mode
-            elif param_modes[0] == 1:
-                test = memory[instr_ptr + 1]
-            else:
-                raise Exception
+            test = get_param_value(param_modes[0], memory, instr_ptr + 1)
 
             # process new_ptr
-            # position mode
-            if param_modes[1] == 0:
-                new_ptr = memory[memory[instr_ptr + 2]]
-            # immediate mode
-            elif param_modes[1] == 1:
-                new_ptr = memory[instr_ptr + 2]
-            else:
-                raise Exception
+            new_ptr = get_param_value(param_modes[1], memory, instr_ptr + 2)
 
             if test != 0:
                 instr_ptr = new_ptr
@@ -213,24 +167,10 @@ def run_intcode(memory, input_list, instr_ptr=0, input_ptr=0, previous_output=No
         # JUMP-IF-FALSE - test, new_ptr
         elif opcode == 6:
             # process test
-            # position mode
-            if param_modes[0] == 0:
-                test = memory[memory[instr_ptr + 1]]
-            # immediate mode
-            elif param_modes[0] == 1:
-                test = memory[instr_ptr + 1]
-            else:
-                raise Exception
+            test = get_param_value(param_modes[0], memory, instr_ptr + 1)
 
             # process new_ptr
-            # position mode
-            if param_modes[1] == 0:
-                new_ptr = memory[memory[instr_ptr + 2]]
-            # immediate mode
-            elif param_modes[1] == 1:
-                new_ptr = memory[instr_ptr + 2]
-            else:
-                raise Exception
+            new_ptr = get_param_value(param_modes[1], memory, instr_ptr + 2)
 
             if test == 0:
                 instr_ptr = new_ptr
@@ -240,35 +180,13 @@ def run_intcode(memory, input_list, instr_ptr=0, input_ptr=0, previous_output=No
         # LESS THAN - num1, num2, store
         elif opcode == 7:
             # process num1
-            # position mode
-            if param_modes[0] == 0:
-                num1 = memory[memory[instr_ptr + 1]]
-            # immediate mode
-            elif param_modes[0] == 1:
-                num1 = memory[instr_ptr + 1]
-            else:
-                raise Exception
+            num1 = get_param_value(param_modes[0], memory, instr_ptr + 1)
 
             # process num2
-            # position mode
-            if param_modes[1] == 0:
-                num2 = memory[memory[instr_ptr + 2]]
-            # immediate mode
-            elif param_modes[1] == 1:
-                num2 = memory[instr_ptr + 2]
-            else:
-                raise Exception
+            num2 = get_param_value(param_modes[1], memory, instr_ptr + 2)
 
             # process store
-            # position mode
-            if param_modes[2] == 0:
-                store = memory[instr_ptr + 3]
-            # immediate mode
-            elif param_modes[2] == 1:
-                # this parameter cannot be in immediate mode
-                raise Exception
-            else:
-                raise Exception
+            store = get_write_param_value(param_modes[2], memory, instr_ptr + 3)
 
             if num1 < num2:
                 memory[store] = 1
@@ -279,35 +197,13 @@ def run_intcode(memory, input_list, instr_ptr=0, input_ptr=0, previous_output=No
         # EQUALS - num1, num2, store
         elif opcode == 8:
             # process num1
-            # position mode
-            if param_modes[0] == 0:
-                num1 = memory[memory[instr_ptr + 1]]
-            # immediate mode
-            elif param_modes[0] == 1:
-                num1 = memory[instr_ptr + 1]
-            else:
-                raise Exception
+            num1 = get_param_value(param_modes[0], memory, instr_ptr + 1)
 
             # process num2
-            # position mode
-            if param_modes[1] == 0:
-                num2 = memory[memory[instr_ptr + 2]]
-            # immediate mode
-            elif param_modes[1] == 1:
-                num2 = memory[instr_ptr + 2]
-            else:
-                raise Exception
+            num2 = get_param_value(param_modes[1], memory, instr_ptr + 2)
 
             # process store
-            # position mode
-            if param_modes[2] == 0:
-                store = memory[instr_ptr + 3]
-            # immediate mode
-            elif param_modes[2] == 1:
-                # this parameter cannot be in immediate mode
-                raise Exception
-            else:
-                raise Exception
+            store = get_write_param_value(param_modes[2], memory, instr_ptr + 3)
 
             if num1 == num2:
                 memory[store] = 1
