@@ -66,9 +66,9 @@ def list_digits(number):
     digits.append(number)
     return digits
 
-def run_intcode(memory, instr_ptr, input_ptr, input_list):
+def run_intcode(memory, input_list, instr_ptr=0, input_ptr=0, previous_output=None):
     """Run an Intcode program from memory"""
-    output = None
+    output = previous_output
     while instr_ptr < len(memory):
         instruction = memory[instr_ptr]
         digits = list_digits(instruction)
@@ -337,6 +337,15 @@ def generate_phase_list(phase_list):
             all_phase_lists.append(sub)
     return all_phase_lists
 
+class Amplifier:
+    """Holds the state of an amplifier"""
+    def __init__(self, memory, phase):
+        self.memory = memory
+        self.input_list = [phase]
+        self.instr_ptr = 0
+        self.input_ptr = 0
+        self.output = None
+
 def main():
     """Solve the problem!"""
     script_dir = os.path.dirname(__file__)
@@ -344,23 +353,43 @@ def main():
     with open(file_path) as input_file:
         init_memory = list(map(int, input_file.read().split(',')))
 
-    all_phase_combos = generate_phase_list([0, 1, 2, 3, 4])
+    all_phase_combos = generate_phase_list([5, 6, 7, 8, 9])
     max_output = None
 
-    amplifier_states = list()
-    for i in range(0, 5):
-        # store amplifier memory, instruction pointer, input pointer, and input list
-        amplifier_states.append(init_memory.copy, 0, 0, [])
-
     for phase_list in all_phase_combos:
-        phase_input = 0
-        # TODO: adapt this so that on "output" from the intcode program, the state is stored
-        # in amplifier_states and the output is added to the input array for the next amp
-        for phase in phase_list:
-            memory = init_memory.copy()
-            phase_input = run_intcode(memory, [phase, phase_input])
-        if max_output is None or phase_input > max_output:
-            max_output = phase_input
+        # initialize all amplifiers with phase
+        amplifier_states = [Amplifier(init_memory.copy(), phase_list[x]) for x in range(0, 5)]
+        # initialize first amp with input of 0
+        amplifier_states[0].input_list.append(0)
+
+        final_output = None
+        # loop through all the amplifiers continuously until they all halt
+        amp_i = 0
+        while True:
+            curr_amp = amplifier_states[amp_i]
+            output_val, new_instr_ptr, new_input_ptr = run_intcode(curr_amp.memory, curr_amp.input_list, curr_amp.instr_ptr, curr_amp.input_ptr, curr_amp.output)
+
+            # store state for current amplifier
+            curr_amp.instr_ptr = new_instr_ptr
+            curr_amp.input_ptr = new_input_ptr
+            curr_amp.output = output_val
+
+            # end looping if last amplifier has halted
+            if amp_i == 4 and new_input_ptr == -1:
+                final_output = output_val
+                break
+
+            # increment to next amplifier
+            if amp_i == 4:
+                amp_i = 0
+            else:
+                amp_i += 1
+
+            # send output from current amp to next amp
+            amplifier_states[amp_i].input_list.append(output_val)
+
+        if max_output is None or final_output > max_output:
+            max_output = final_output
     print(max_output)
 
 if __name__ == "__main__":
