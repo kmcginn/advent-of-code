@@ -62,6 +62,172 @@ keycode does it produce?
 
 import os
 
+def list_digits(number):
+    """Takes up to a 6 digit int and returns a list of each digit in order"""
+    factor = 100000
+    digits = list()
+    while factor > 1:
+        digits.append(number // factor)
+        number = number % factor
+        factor //= 10
+    digits.append(number)
+    return digits
+
+def get_param_value(mode, memory, ptr):
+    """Returns the value of the parameter at memory[ptr] based on the mode"""
+    # position mode
+    if mode == 0:
+        return memory[memory[ptr]]
+    # immediate mode
+    elif mode == 1:
+        return memory[ptr]
+    # relative mode
+    elif mode == 2:
+        raise NotImplementedError
+    else:
+        raise Exception
+
+def get_write_param_value(mode, memory, ptr):
+    """Returns the value of the paramter at memory[ptr] based on the mode, for a writing paramter"""
+    # position mode
+    if mode == 0:
+        return memory[ptr]
+    # immediate mode
+    elif mode == 1:
+        # immediate mode is not supported
+        raise Exception
+    elif mode == 2:
+        raise NotImplementedError
+    else:
+        raise Exception
+
+def run_intcode(memory, input_list, instr_ptr=0, input_ptr=0, previous_output=None):
+    """Run an Intcode program from memory"""
+    output = previous_output
+    while instr_ptr < len(memory):
+        instruction = memory[instr_ptr]
+        digits = list_digits(instruction)
+
+        # extract opcode
+        opcode_pair = digits[len(digits)-2:]
+        opcode = opcode_pair[0]*10 + opcode_pair[1]
+
+        # extract parameter modes
+        param_modes = digits[:len(digits)-2]
+        param_modes.reverse()
+
+        # HALT
+        if opcode == 99:
+            return (output, -1, -1)
+
+        # ADD - num1, num2, store
+        if opcode == 1:
+            # process num1
+            num1 = get_param_value(param_modes[0], memory, instr_ptr + 1)
+
+            # process num2
+            num2 = get_param_value(param_modes[1], memory, instr_ptr + 2)
+
+            # process store
+            store = get_write_param_value(param_modes[2], memory, instr_ptr + 3)
+
+            memory[store] = num1 + num2
+            instr_ptr = instr_ptr + 4
+
+        # MULTIPLY - num1, num2, store
+        elif opcode == 2:
+            # process num1
+            num1 = get_param_value(param_modes[0], memory, instr_ptr + 1)
+
+            # process num2
+            num2 = get_param_value(param_modes[1], memory, instr_ptr + 2)
+
+            # process store
+            store = get_write_param_value(param_modes[2], memory, instr_ptr + 3)
+
+            memory[store] = num1 * num2
+            instr_ptr = instr_ptr + 4
+
+        # INPUT - position
+        elif opcode == 3:
+            position = get_write_param_value(param_modes[0], memory, instr_ptr + 1)
+
+            memory[position] = input_list[input_ptr]
+            input_ptr = input_ptr + 1
+            instr_ptr = instr_ptr + 2
+
+        # OUTPUT - position
+        elif opcode == 4:
+            output = get_param_value(param_modes[0], memory, instr_ptr + 1)
+
+            instr_ptr = instr_ptr + 2
+            return (output, instr_ptr, input_ptr)
+
+        # JUMP-IF-TRUE - test, new_ptr
+        elif opcode == 5:
+            # process test
+            test = get_param_value(param_modes[0], memory, instr_ptr + 1)
+
+            # process new_ptr
+            new_ptr = get_param_value(param_modes[1], memory, instr_ptr + 2)
+
+            if test != 0:
+                instr_ptr = new_ptr
+            else:
+                instr_ptr = instr_ptr + 3
+
+        # JUMP-IF-FALSE - test, new_ptr
+        elif opcode == 6:
+            # process test
+            test = get_param_value(param_modes[0], memory, instr_ptr + 1)
+
+            # process new_ptr
+            new_ptr = get_param_value(param_modes[1], memory, instr_ptr + 2)
+
+            if test == 0:
+                instr_ptr = new_ptr
+            else:
+                instr_ptr = instr_ptr + 3
+
+        # LESS THAN - num1, num2, store
+        elif opcode == 7:
+            # process num1
+            num1 = get_param_value(param_modes[0], memory, instr_ptr + 1)
+
+            # process num2
+            num2 = get_param_value(param_modes[1], memory, instr_ptr + 2)
+
+            # process store
+            store = get_write_param_value(param_modes[2], memory, instr_ptr + 3)
+
+            if num1 < num2:
+                memory[store] = 1
+            else:
+                memory[store] = 0
+            instr_ptr = instr_ptr + 4
+
+        # EQUALS - num1, num2, store
+        elif opcode == 8:
+            # process num1
+            num1 = get_param_value(param_modes[0], memory, instr_ptr + 1)
+
+            # process num2
+            num2 = get_param_value(param_modes[1], memory, instr_ptr + 2)
+
+            # process store
+            store = get_write_param_value(param_modes[2], memory, instr_ptr + 3)
+
+            if num1 == num2:
+                memory[store] = 1
+            else:
+                memory[store] = 0
+            instr_ptr = instr_ptr + 4
+
+        # unknown opcode
+        else:
+            raise Exception
+    raise Exception
+
 def main():
     """Solve the problem!"""
     script_dir = os.path.dirname(__file__)
