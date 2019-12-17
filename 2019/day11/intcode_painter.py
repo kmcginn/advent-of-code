@@ -279,6 +279,9 @@ def main():
     input_ptr = 0
     current_location = (0, 0)
     current_direction = Direction.UP
+    # for part 2, the starting location is white
+    hull_locations[current_location] = 1
+    # TODO: figure out why intcode is throwing errors in this configuration
     while True:
         # add the paint color of the current panel to the input list
         input_list.append(hull_locations[current_location])
@@ -292,8 +295,10 @@ def main():
         if instr_ptr == -1:
             break
         current_location, current_direction = process_turn(turn, current_location, current_direction)
-    # determine number of panels painted at least once
+    # for part 1, determine number of panels painted at least once
     print(len(hull_locations.keys()))
+    # for part 2, print the results
+    print_hull(hull_locations)
 
 class Direction(Enum):
     """Enum to define the cardinal directions"""
@@ -325,6 +330,9 @@ def process_turn(turn, current_location, current_direction):
         elif turn == 1:
             return ((current_location[0], current_location[1] - 1), Direction.DOWN)
     raise Exception
+
+def print_hull(hull_locations):
+    raise NotImplementedError
 
 if __name__ == "__main__":
     main()
