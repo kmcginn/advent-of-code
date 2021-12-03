@@ -8,12 +8,13 @@ from: <LINK>
 
 import os
 
-def main():
+def main(filename):
     """Solve the problem!"""
     script_dir = os.path.dirname(__file__)
-    file_path = os.path.join(script_dir, './input.txt')
+    file_path = os.path.join(script_dir, filename)
     with open(file_path) as input_file:
         pass
 
 if __name__ == "__main__":
-    main()
+    main('example.txt')
+    main('input.txt')
