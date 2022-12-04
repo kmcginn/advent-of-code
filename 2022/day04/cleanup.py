@@ -17,12 +17,16 @@ def main(filename):
     script_dir = os.path.dirname(__file__)
     file_path = os.path.join(script_dir, filename)
     total_full_overlaps = 0
+    total_overlaps = 0
     with open(file_path) as input_file:
         for line in input_file:
             first_sectors, second_sectors = parse_sectors(line)
             if first_sectors.issubset(second_sectors) or second_sectors.issubset(first_sectors):
                 total_full_overlaps += 1
-    print(total_full_overlaps)
+            if not first_sectors.isdisjoint(second_sectors):
+                total_overlaps += 1
+    print(f'Full overlap: {total_full_overlaps}')
+    print(f'Overlap: {total_overlaps}')
 
 
 if __name__ == "__main__":
